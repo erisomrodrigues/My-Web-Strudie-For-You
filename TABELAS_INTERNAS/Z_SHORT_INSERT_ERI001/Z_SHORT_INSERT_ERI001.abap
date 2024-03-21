@@ -37,6 +37,5 @@ DATA: GT_BNKA TYPE HASHED TABLE OF BNKA WITH UNIQUE KEY BANKS BANKL,
         ELSE.
         WRITE:/ 'INSERT KO'.
       ENDIF.
-      
-      CL_DEMO_
-      
+
+      cl_demo_output=>display( gt_bnka ).
