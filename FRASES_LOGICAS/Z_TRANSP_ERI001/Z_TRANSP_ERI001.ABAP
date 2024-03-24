@@ -5,65 +5,62 @@
 *&---------------------------------------------------------------------*
 REPORT z_tab_table_eri001.
 
-TYPES: BEGIN OF gty_clientes,
-         num_cliente TYPE i,
-         name1       TYPE name1_gp,
-         land1       TYPE land1,
+TYPES: BEGIN OF GTY_CLIENTES,
+        NUM_CLIENTE TYPE I,
+        NAME1       TYPE NAME1_GP,
+        LAND1       TYPE LAND1_GP,
        END OF gty_clientes.
 
-DATA: gt_kna1      TYPE TABLE OF kna1,
-      gty_clientes TYPE gty_clientes.
+DATA: GT_KNA1 TYPE TABLE OF KNA1,
+      GT_CLIENTES   TYPE TABLE OF gty_clientes.
 
-DATA: gwa_kna1     TYPE kna1,
-      gwa_clientes TYPE gty_clientes.
+DATA: GWA_KNA1 TYPE KNA1,
+      GWA_CLIENTES TYPE gty_clientes.
 
-DATA: gt_clientes TYPE TABLE OF gty_clientes.
+DATA: GV_NUM_CLIENTE TYPE I,
+      GB_EXIST       TYPE abap_bool.
 
-DATA: gv_num_cliente TYPE i,
-      gb_exist       TYPE string.
+CONSTANTS: GC_SELECT_KO TYPE STRING VALUE 'SELECT KO',
+           GC_APPEND_KO TYPE STRING VALUE 'APPEND KO',
+           GC_LOOP_KO   TYPE STRING VALUE 'LOOP KO'.
 
-CONSTANTS: gc_select_ko TYPE string VALUE 'SELECT KO',
-           gc_append_ko TYPE string VALUE 'APPEND KO',
-           gc_loop_ko   TYPE string VALUE 'LOOP AT KO'.
-
-SELECT * FROM kna1
-         INTO TABLE gt_kna1.
-
-IF sy-subrc <> 0.
-  WRITE:/ gc_select_ko.
-ELSE.
-  LOOP AT gt_kna1 INTO gwa_kna1
-    WHERE land1 <> 'DE'.
+SELECT * FROM KNA1
+         INTO TABLE GT_KNA1.
+IF SY-SUBRC <> 0.
+    WRITE:/ gc_select_ko.
+    ELSE.
+    LOOP AT GT_KNA1 INTO GWA_KNA1
+    WHERE LAND1 <> 'PT'.
     ADD 1 TO gv_num_cliente.
     gwa_clientes-num_cliente = gv_num_cliente.
-    gwa_clientes-name1 = gwa_kna1-name1.
-    gwa_clientes-land1 = gwa_kna1-land1.
+    GWA_CLIENTES-name1 = gwa_kna1-name1.
+    GWA_CLIENTES-land1 = GWA_KNA1-land1.
     APPEND gwa_clientes TO gt_clientes.
 
-    IF sy-subrc NE 0.
-      WRITE:/ gc_append_ko.
+    IF SY-SUBRC <> 0.
+        WRITE:/ gc_append_ko.
     ENDIF.
-  ENDLOOP.
+    ENDLOOP.
 
-  IF sy-subrc NE 0.
-    WRITE:/ gc_loop_ko.
-  ELSE.
-    cl_demo_output=>display( gt_clientes ).
-  ENDIF.
+    IF SY-SUBRC <> 0.
+    WRITE:/ gc_loop_ko, SY-SUBRC.
+    ELSE.
+    CL_DEMO_OUTPUT=>display( gt_clientes ).
+    ENDIF.
+
 ENDIF.
 
-gb_exist = abap_true.
+gb_exist = ABAP_FALSE.
 
-LOOP AT gt_kna1 TRANSPORTING NO FIELDS
-WHERE land1 <> 'DE'.
-  gb_exist = abap_true.
+LOOP AT GT_KNA1 TRANSPORTING NO FIELDS
+WHERE LAND1 <> 'PT'.
+    gb_exist = ABAP_TRUE.
 
-  EXIT.
-
+EXIT.
 ENDLOOP.
 
 IF gb_exist = abap_false.
-  MESSAGE 'NOT EXIST' TYPE 'I'.
-ELSE.
-  MESSAGE 'EXIST' TYPE 'I'.
+    MESSAGE 'NOT EXIST' TYPE 'I'.
+    ELSE.
+    MESSAGE 'EXIST' TYPE 'I'.
 ENDIF.
