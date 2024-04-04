@@ -29,6 +29,7 @@ CONSTANTS: gc_select_ko TYPE string VALUE 'SELECT KO',
            gc_exist     TYPE string VALUE 'EXIST',
            GC_DELETE_KO TYPE STRING VALUE 'DELETE KO',
            GC_SORT_KO   TYPE STRING VALUE 'SORT KO'.
+
 SELECT * FROM kna1
          INTO TABLE gt_kna1.
 
@@ -51,7 +52,15 @@ ELSE.
     IF sy-subrc <> 0.
       WRITE:/ gc_append_ko.
     ENDIF.
+
   ENDLOOP.
+
+  IF SY-subrc <> 0.
+    WRITE:/ gc_loop_ko, SY-subrc.
+
+  ELSE.
+    cl_demo_output=>display( gt_clientes ).
+  ENDIF.
 
   SORT gt_clientes BY LAND1 NAME1 DESCENDING.
 
