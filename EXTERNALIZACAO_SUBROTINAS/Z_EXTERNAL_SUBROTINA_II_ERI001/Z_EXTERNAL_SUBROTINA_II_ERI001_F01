@@ -48,14 +48,14 @@ ENDFORM.
 *& <--  p2        text
 *&---------------------------------------------------------------------*
 FORM baja_socio.
+  DATA: lv_subrc TYPE sy-subrc.
   IF pa_dni = ''.
     PERFORM dni_vazio.
   ELSE.
-    gwa_socios-dni = pa_dni.
 
-    DELETE zsocios_eri001 FROM gwa_socios.
+    PERFORM delete_zsocio USING pa_dni CHANGING gwa_subrc.
 
-    CASE sy-subrc.
+    CASE lv_subrc.
       WHEN 0.
         MESSAGE i008(z_eri001).
       WHEN 4.
@@ -88,24 +88,24 @@ FORM consulta_socio.
   DATA: le_socios TYPE zsocios_eri001,
         lv_subrc  TYPE sy-subrc.
   IF pa_dni = ''.
-  PERFORM dni_vazio.
-ELSE.
-  PERFORM select_zsocios USING pa_dni CHANGING le_socios lv_subrc.
+    PERFORM dni_vazio.
+  ELSE.
+    PERFORM select_zsocios USING pa_dni CHANGING le_socios lv_subrc.
 
-  CASE lv_subrc.
-    WHEN 0.
-      pa_nom =    le_socios-nom.
-      pa_ape =    le_socios-ape.
-      pa_edad =   le_socios-edad.
-      pa_fecha =  le_socios-fecha.
+    CASE lv_subrc.
+      WHEN 0.
+        pa_nom =    le_socios-nom.
+        pa_ape =    le_socios-ape.
+        pa_edad =   le_socios-edad.
+        pa_fecha =  le_socios-fecha.
 
-      CALL SELECTION-SCREEN 1000.
-    WHEN 4.
-      MESSAGE i011(z_eri001).
-    WHEN OTHERS.
-      MESSAGE i012(z_eri001).
-  ENDCASE.
-ENDIF.
+        CALL SELECTION-SCREEN 1000.
+      WHEN 4.
+        MESSAGE i011(z_eri001).
+      WHEN OTHERS.
+        MESSAGE i012(z_eri001).
+    ENDCASE.
+  ENDIF.
 
 ENDFORM.
 *&---------------------------------------------------------------------*
@@ -149,13 +149,13 @@ FORM listar_socio .
   SELECT * FROM zsocios_eri001
            INTO TABLE gt_socios.
 
-    IF sy-subrc = 0.
-      LOOP AT gt_socios INTO gwa_socios.
-        WRITE:/ 'DNI: ', gwa_socios-dni, 'NOMBRE: ', gwa_socios-nom.
-      ENDLOOP.
-    ELSE.
-      MESSAGE i016(z_eri001).
-    ENDIF.
+  IF sy-subrc = 0.
+    LOOP AT gt_socios INTO gwa_socios.
+      WRITE:/ 'DNI: ', gwa_socios-dni, 'NOMBRE: ', gwa_socios-nom.
+    ENDLOOP.
+  ELSE.
+    MESSAGE i016(z_eri001).
+  ENDIF.
 
 
 
@@ -169,14 +169,34 @@ ENDFORM.
 *&      <-- LE_SOCIOS
 *&      <-- LV_SUBRC
 *&---------------------------------------------------------------------*
-FORM select_zsocios  USING    p_pa_dni TYPE C
+FORM select_zsocios  USING    p_pa_dni TYPE c
                      CHANGING p_le_socios STRUCTURE zsocios_eri001
-                              p_lv_subrc TYPE I.
+                              p_lv_subrc TYPE i.
 
   SELECT SINGLE * FROM zsocios_eri001
                   INTO p_le_socios
                   WHERE dni = p_pa_dni.
 
-    P_LV_SUBRC = SY-SUBRC.
+  p_lv_subrc = sy-subrc.
 
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form DELETE_ZSOCIO
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM delete_zsocio USING p_dni TYPE c CHANGING p_resultado TYPE i.
+
+  DATA: le_socios TYPE szocios_eri001.
+
+  le_socios-dni = p_dni.
+
+  DELETE zsocios_eri001 FROM gwa_socios.
+
+  p_resultado = sy-sub.
+
+  p_dni = '9999999999'.
 ENDFORM.
